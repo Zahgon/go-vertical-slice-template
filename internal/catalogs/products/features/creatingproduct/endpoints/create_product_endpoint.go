@@ -7,10 +7,11 @@ import (
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/catalogs/products/contracts/params"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/catalogs/products/features/creatingproduct/commands"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/catalogs/products/features/creatingproduct/dtos"
+	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/ginweb"
 	customErrors "github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/httperrors/customerrors"
 
 	"emperror.dev/errors"
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 	"github.com/mehdihadeli/go-mediatr"
 )
 
@@ -35,23 +36,23 @@ func (ep *createProductEndpoint) MapEndpoint() {
 // @Param CreateProductRequestDto body creatingProductsDtos.CreateProductRequestDto true "Product data"
 // @Success 201 {object} creatingProductsDtos.CreateProductResponseDto
 // @Router /api/v1/products [post]
-func (ep *createProductEndpoint) handler() echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+func (ep *createProductEndpoint) handler() gin.HandlerFunc {
+	return ginweb.Handler(func(ctx *gin.Context) error {
 		request := &dtos.CreateProductRequestDto{}
-		if err := ctx.Bind(request); err != nil {
+		if err := ginweb.BindBody(ctx, request); err != nil {
 			return customErrors.NewBadRequestErrorWrap(
 				err,
 				"error in the binding request",
 			)
 		}
 
-		if err := ep.Validator.StructCtx(ctx.Request().Context(), request); err != nil {
+		if err := ep.Validator.StructCtx(ctx.Request.Context(), request); err != nil {
 			return customErrors.NewValidationErrorWrap(err, "validation error")
 		}
 
 		command := commands.NewCreateProductCommand(request.Name, request.Description, request.Price)
 		result, err := mediatr.Send[*commands.CreateProductCommand, *dtos.CreateProductCommandResponse](
-			ctx.Request().Context(),
+			ctx.Request.Context(),
 			command,
 		)
 		if err != nil {
@@ -61,6 +62,6 @@ func (ep *createProductEndpoint) handler() echo.HandlerFunc {
 			)
 		}
 
-		return ctx.JSON(http.StatusCreated, result)
-	}
+		return ginweb.JSON(ctx, http.StatusCreated, result)
+	})
 }

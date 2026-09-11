@@ -7,7 +7,7 @@
     "logType": 0,
     "callerEnabled": false
   },
-  "echoHttpOptions": {
+  "ginHttpOptions": {
     "name": "catalogs",
     "port": ":9080",
     "development": true,

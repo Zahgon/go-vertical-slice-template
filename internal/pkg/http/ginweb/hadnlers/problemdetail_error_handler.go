@@ -1,16 +1,16 @@
 package handlers
 
 import (
-	problemDetails "github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/httperrors/problemdetails"
+	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/httperrors/problemdetails"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/logger"
 
 	"emperror.dev/errors"
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 func ProblemDetailErrorHandlerFunc(
 	err error,
-	c echo.Context,
+	c *gin.Context,
 	logger logger.Logger,
 ) {
 	var problem problemDetails.ProblemDetailErr
@@ -20,9 +20,9 @@ func ProblemDetailErrorHandlerFunc(
 		problem = problemDetails.ParseError(err)
 	}
 
-	if !c.Response().Committed && problem != nil {
+	if !c.Writer.Written() && problem != nil {
 		// `WriteTo` will set `Response status code` to our problem details status
-		if _, err := problemDetails.WriteTo(problem, c.Response()); err != nil {
+		if _, err := problemDetails.WriteTo(problem, c.Writer); err != nil {
 			logger.Error(err)
 		}
 	}

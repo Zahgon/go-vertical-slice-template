@@ -12,7 +12,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/mehdihadeli/go-mediatr"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/ginweb"
 )
 
 func (a *Application) ConfigInfrastructure() error {
@@ -65,5 +65,5 @@ func (a *Application) configSwagger() {
 	docs.SwaggerInfo.Title = "Catalogs Write-Service Api"
 	docs.SwaggerInfo.Description = "Catalogs Write-Service Api."
 
-	a.Echo.GET("/swagger/*", echoSwagger.WrapHandler)
+	a.Gin.GET("/swagger/*any", ginweb.SwaggerHandler("/swagger", "any"))
 }

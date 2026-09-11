@@ -9,8 +9,8 @@ import (
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/logger"
 
 	"emperror.dev/errors"
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -29,8 +29,8 @@ func (b *ApplicationBuilder) AddCatalogs() error {
 }
 
 func (b *ApplicationBuilder) addRoutes() error {
-	// https://echo.labstack.com/docs/routing
-	err := b.Container.Provide(func(e *echo.Echo, l logger.Logger) (*params.ProductRouteParams, error) {
+	// https://gin-gonic.com/docs/examples/grouping-routes/
+	err := b.Container.Provide(func(e *gin.Engine, l logger.Logger) (*params.ProductRouteParams, error) {
 		v1 := e.Group("/api/v1")
 		products := v1.Group("/products")
 

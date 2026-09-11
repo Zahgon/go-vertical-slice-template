@@ -3,7 +3,7 @@ package applicationbuilder
 import (
 	"github.com/mehdihadeli/go-vertical-slice-template/config"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/database"
-	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/echoweb"
+	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/ginweb"
 )
 
 func (b *ApplicationBuilder) AddInfrastructure() {
@@ -17,7 +17,7 @@ func (b *ApplicationBuilder) AddInfrastructure() {
 		b.Logger.Fatal(err)
 	}
 
-	err = echoweb.AddEcho(b.Container)
+	err = ginweb.AddGin(b.Container)
 	if err != nil {
 		b.Logger.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"emperror.dev/errors"
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 func SkipCI(t *testing.T) {
@@ -39,7 +39,7 @@ func WaitUntilConditionMet(conditionToMet func() bool, timeout ...time.Duration)
 	return nil
 }
 
-func HttpRecorder(t *testing.T, e *echo.Echo, req *http.Request, f func(w *httptest.ResponseRecorder) bool) {
+func HttpRecorder(t *testing.T, e *gin.Engine, req *http.Request, f func(w *httptest.ResponseRecorder) bool) {
 	w := httptest.NewRecorder()
 	e.ServeHTTP(w, req)
 

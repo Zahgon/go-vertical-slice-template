@@ -14,23 +14,24 @@ import (
 	"github.com/mehdihadeli/go-vertical-slice-template/config"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/logger"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 )
 
 type Application struct {
-	Container *dig.Container
-	Echo      *echo.Echo
-	Logger    logger.Logger
-	Cfg       *config.Config
+	Container  *dig.Container
+	Gin        *gin.Engine
+	Logger     logger.Logger
+	Cfg        *config.Config
+	httpServer *http.Server
 }
 
 func NewApplication(container *dig.Container) *Application {
 	app := &Application{}
-	err := container.Invoke(func(c *config.Config, e *echo.Echo, logger logger.Logger) error {
+	err := container.Invoke(func(c *config.Config, e *gin.Engine, logger logger.Logger) error {
 		app.Container = container
-		app.Echo = e
+		app.Gin = e
 		app.Logger = logger
 		app.Cfg = c
 
@@ -100,12 +101,12 @@ func (a *Application) RunTest(t *testing.T) {
 
 func (a *Application) Start(startCtx context.Context) {
 	// start hooks
-	echoStartHook(startCtx, a)
+	ginStartHook(startCtx, a)
 }
 
 func (a *Application) Stop(shutdownCtx context.Context) {
 	// stop hooks
-	echoStopHook(shutdownCtx, a)
+	ginStopHook(shutdownCtx, a)
 
 	log.Println("Graceful shutdown complete.")
 }
@@ -117,16 +118,25 @@ func (a *Application) Wait() <-chan os.Signal {
 }
 
 // Hooks
-func echoStopHook(stopCtx context.Context, application *Application) {
-	if err := application.Echo.Shutdown(stopCtx); err != nil {
+func ginStopHook(stopCtx context.Context, application *Application) {
+	if application.httpServer == nil {
+		return
+	}
+
+	if err := application.httpServer.Shutdown(stopCtx); err != nil {
 		log.Fatalf("HTTP shutdown error: %v", err)
 	}
 }
 
-func echoStartHook(startCtx context.Context, application *Application) {
+func ginStartHook(startCtx context.Context, application *Application) {
+	application.httpServer = &http.Server{
+		Addr:    application.Cfg.GinHttpOptions.Port,
+		Handler: application.Gin,
+	}
+
 	go func() {
 		// When Shutdown is called, Serve, ListenAndServe, and ListenAndServeTLS immediately return ErrServerClosed. Make sure the program doesn't exit and waits instead for Shutdown to return.
-		if err := application.Echo.Start(application.Cfg.EchoHttpOptions.Port); !errors.Is(err, http.ErrServerClosed) {
+		if err := application.httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			application.Logger.Fatalf("HTTP server error: %v", err)
 		}
 		application.Logger.Info("Stopped serving new HTTP connections.")

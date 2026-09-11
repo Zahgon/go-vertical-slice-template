@@ -11,7 +11,7 @@ import (
 
 type Config struct {
 	AppOptions      AppOptions      `mapstructure:"appOptions"      env:"AppOptions"`
-	EchoHttpOptions EchoHttpOptions `mapstructure:"echoHttpOptions"`
+	GinHttpOptions GinHttpOptions `mapstructure:"ginHttpOptions"`
 }
 
 func NewAppConfig(env environemnt.Environment) (*Config, error) {
@@ -35,7 +35,7 @@ func (cfg *AppOptions) GetMicroserviceName() string {
 	return cfg.Name
 }
 
-type EchoHttpOptions struct {
+type GinHttpOptions struct {
 	Port                string   `mapstructure:"port"                validate:"required" env:"Port"`
 	Development         bool     `mapstructure:"development"                             env:"Development"`
 	BasePath            string   `mapstructure:"basePath"            validate:"required" env:"BasePath"`
@@ -46,11 +46,11 @@ type EchoHttpOptions struct {
 	Name                string   `mapstructure:"name"                                    env:"Name"`
 }
 
-func (c *EchoHttpOptions) Address() string {
+func (c *GinHttpOptions) Address() string {
 	return fmt.Sprintf("%s%s", c.Host, c.Port)
 }
 
-func (c *EchoHttpOptions) BasePathAddress() string {
+func (c *GinHttpOptions) BasePathAddress() string {
 	path, err := url.JoinPath(c.Address(), c.BasePath)
 	if err != nil {
 		return ""

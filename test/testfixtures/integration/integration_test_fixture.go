@@ -53,7 +53,7 @@ func NewIntegrationTestSharedFixture(
 			integrationFixture.Container = container
 			integrationFixture.Gorm = db
 			integrationFixture.Cfg = cfg
-			integrationFixture.BaseAddress = cfg.EchoHttpOptions.BasePathAddress()
+			integrationFixture.BaseAddress = cfg.GinHttpOptions.BasePathAddress()
 			integrationFixture.ProductRepository = productRepository
 		},
 	)

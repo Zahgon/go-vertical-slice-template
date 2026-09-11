@@ -5,6 +5,7 @@ import (
 
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/catalogs/products/contracts"
 	"github.com/mehdihadeli/go-vertical-slice-template/internal/catalogs/products/models"
+	"github.com/mehdihadeli/go-vertical-slice-template/internal/pkg/http/ginweb"
 
 	"emperror.dev/errors"
 	uuid "github.com/satori/go.uuid"
@@ -31,6 +32,9 @@ func (a *Application) mapEndpoints() error {
 			endpoint.MapEndpoint()
 		}
 	})
+
+	// every registered path also answers OPTIONS with an `Allow` header
+	ginweb.RegisterAutoOptions(a.Gin)
 
 	return nil
 }
